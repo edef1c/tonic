@@ -45,3 +45,6 @@ uninlined_format_args = "deny"
 
 [workspace.lints.rustdoc]
 broken_intra_doc_links = "deny"
+
+[patch.crates-io]
+hyper = { git = "https://github.com/arianvp/hyper.git", branch = "push-ktssyytnyrru" }

@@ -42,11 +42,13 @@ server = [
   "dep:tower", "tower?/util", "tower?/limit", "tower?/load-shed",
 ]
 channel = [
+  "dep:h2",
   "dep:hyper", "hyper?/client",
   "dep:hyper-util", "hyper-util?/client-legacy",
   "dep:tower", "tower?/balance", "tower?/buffer", "tower?/discover", "tower?/limit", "tower?/load-shed", "tower?/util",
   "dep:tokio", "tokio?/time",
   "dep:hyper-timeout",
+  "dep:shared_http_body",
 ]
 transport = ["server", "channel"]
 
@@ -92,6 +94,7 @@ zstd = { version = "0.13.0", optional = true }
 
 # channel
 hyper-timeout = {version = "0.5", optional = true}
+shared_http_body = {version = "0.1", optional = true}
 sync_wrapper = "1.0.2"
 
 [dev-dependencies]

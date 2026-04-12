@@ -15,7 +15,7 @@ type BoxFuture =
 /// Returns true if the error indicates a request that was never processed by
 /// the server and is unconditionally safe to retry per RFC 9113 §6.8 and gRFC A6.
 ///
-/// This covers three cases:
+/// This covers four cases:
 /// - GOAWAY with NO_ERROR: the server is shutting down gracefully, streams that
 ///   tried to open after conn_error was set get this error
 /// - REFUSED_STREAM: streams that had HEADERS on the wire but whose IDs were
@@ -23,6 +23,9 @@ type BoxFuture =
 /// - Canceled: requests queued in hyper's dispatch channel that never reached
 ///   h2::SendRequest::send_request() — the channel was dropped when the
 ///   connection task exited on Dispatched::Shutdown
+/// - DispatchGone: the h2 connection task exited (e.g. after draining a GOAWAY)
+///   while requests were still queued in hyper's dispatch channel — the
+///   Callback::drop() impl sends this error to waiting callers
 fn is_retryable_stream_rejection(err: &crate::BoxError) -> bool {
     if let Some(hyper_err) = err.downcast_ref::<hyper::Error>() {
         // GOAWAY with NO_ERROR
@@ -32,6 +35,14 @@ fn is_retryable_stream_rejection(err: &crate::BoxError) -> bool {
 
         // Canceled: request never left hyper's dispatch channel
         if hyper_err.is_canceled() {
+            return true;
+        }
+
+        // DispatchGone: connection task exited while requests were queued.
+        // This is the typical error path when GOAWAY causes the h2 connection
+        // to drain and exit — pending Callback objects are dropped, producing
+        // this error for any request still in the dispatch channel.
+        if hyper_err.is_dispatch_gone() {
             return true;
         }
 

@@ -47,4 +47,4 @@ uninlined_format_args = "deny"
 broken_intra_doc_links = "deny"
 
 [patch.crates-io]
-hyper = { git = "https://github.com/edef1c/hyper.git", branch = "push-okymqovvyvmu" }
+hyper = { git = "https://github.com/arianvp/hyper.git", branch = "dispatch-gone" }
